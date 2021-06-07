@@ -1,50 +1,44 @@
-//es7
-//rcc
-
-import React, { Component } from 'react'
-
+// react snippets
+// rcc
+import React, { Component } from 'react';
+import TaskList from './TaskList';
+import InputContainer from './InputContainer';
+//1.render -> static ui define
+// /2. identify different variables that 
+// can change throughout the life time -> state
+// 3. rewrite render using those state variables
+// 4. event listener to change the state
 export default class Todo extends Component {
     state = {
-        taskList: ["Task-1", "Task-2", "Task-3","Task-4"],
-        // count: 0
+        taskList: []
     }
-
-
-    deleteTask(cTask) {
-        let filteredtasks = this.state.taskList.filter(function (task) {
-            return task !== cTask;
-        })
+    deleteTask = (id) => {
+        // current - rest of the task 
+        let filteredtasks = this.state.taskList.filter(function (task) { return task.id !== id; })
         this.setState({
             taskList: filteredtasks
+        });
+    }
+    addTask = (currTask) => {
+        // let currTask = this.state.currTask;
+        // let tempArr = [];
+        // for (let i = 0; i < this.state.taskList.length; i++) {
+        //     tempArr.push(this.state.taskList[i]);
+        // }
+        // tempArr.push(currTask);
+        let tempArr = [...this.state.taskList, 
+            { task: currTask, id: this.state.taskList.length }]
+        this.setState({
+            taskList: tempArr 
         })
     }
-
     render() {
         return (
             <div>
-                <div className="input-container">
-                    <input type="text" />
-                    <button>submit</button>
-
-                </div>
-                <div className="task-list">
-                    <ul>
-                        {this.state.taskList.map((task) => {
-                            return(
-                                <li className="tasklist" >
-                                    <p>{task}</p>
-                                    <button onClick={() => {
-                                        this.deleteTask(task)
-                                    }}>
-
-                                  Delete  </button>
-
-                                </li>
-                            )
-                        })}
-                    </ul>
-
-                </div>
+                {/* passing props to children component */}
+    <InputContainer addTask={this.addTask}></InputContainer>
+<TaskList list={this.state.taskList} deleteTask={this.deleteTask}>
+</TaskList>
             </div>
         )
     }
