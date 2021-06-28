@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import { getMovies } from '../temp/MoviesService'
+import List from "./List"
+import Pagination from "./Pagination"
 export default class MoviesPage extends Component {
     state = {
         movies: [],
@@ -74,9 +76,13 @@ export default class MoviesPage extends Component {
             currentPage: pageNumber
         })
     }
-    groupBygenre =(name) =>{
-        this.state
+    groupBygenr = (name) => {
+        this.setState({
+            cGenre: name,
+            currSearchText: ""
+        })
     }
+
     async componentDidMount() {
         // console.log(2);
         let resp = await fetch("https://react-backend101.herokuapp.com/movies");
@@ -94,25 +100,32 @@ export default class MoviesPage extends Component {
 
     render() {
         console.log(1);
-        let { movies, currSearchText, limit, currentPage, genres } = this.state;
-        console.log(movies);
-        let filteredArr = movies.filter((movieObj) => {
-            let title = movieObj.title.trim().toLowerCase();
-            // console.log(title);
-            return title.includes(currSearchText.toLowerCase());
-        })
-        if (currSearchText == "") {
-            filteredArr = this.state.movies;
+        let { movies, currSearchText, limit, currentPage,cGenre, genres } = this.state;
+        // console.log(movies);
+
+        let filteredArr = movies;
+
+        if (cGenre != "All Genres") {
+            filteredArr = filteredArr.filter((moviesObj) => {
+                return  moviesObj.genre.name==cGenre;
+                    
+            })
+        }
+
+        
+        if (currSearchText != "") {
+            filteredArr = movies.filter((movieObj) => {
+                let title = movieObj.title.trim().toLowerCase();
+                // console.log(title);
+                return title.includes(currSearchText.toLowerCase());
+            })
         }
         // console.log(filteredArr);
         // si -> (pagenumber-1)*limit;
         // eidx = si+limit;
         // number of pages 
         let numberofPage = Math.ceil(filteredArr.length / limit);
-        let pageNumberArr = []
-        for (let i = 0; i < numberofPage; i++) {
-            pageNumberArr.push(i + 1);
-        }
+
         // impliment
         let si = (currentPage - 1) * limit;
         let eidx = si + limit;
@@ -121,13 +134,7 @@ export default class MoviesPage extends Component {
             <div className="row">
                 {/* 12 part */}
                 <div className="col-3">
-                    <ul class="list-group">
-                        {
-                            genres.map((cgObj) => {
-                                return (<li class="list-group-item" key={cgObj.id} >{cgObj.name}</li>)
-                            })
-                        }
-                    </ul>
+                    <List genres={genres} groupBygenre={this.groupBygenre}></List>
                 </div>
                 <div className="col-9">
                     <input type="search" value={currSearchText}
@@ -174,25 +181,17 @@ export default class MoviesPage extends Component {
                             })}
                         </tbody>
                     </table>
-                    <nav aria-label="..." className="col-2" >
-                        <ul className="pagination ">
-                            {
-                                pageNumberArr.map((pageNumber) => {
-                                    let additional = pageNumber == currentPage ? "page-item active" : "page-item";
-                                    return (
-                                        <li className={additional}
-                                            aria-current="page" onClick={() => { this.changeCurrentPage(pageNumber) }}>
-                                            <span className="page-link">{pageNumber}</span>
-                                        </li>
-                                    )
-                                })
-                            }
-                        </ul>
-                    </nav>
 
+                    <Pagination
+                        numerofPage={numberofPage}
+                        currentPage={currentPage}
+                        changeCurrentPage={this.changeCurrentPage}
+                    ></Pagination>
                 </div>
             </div >
 
         )
     }
 }
+
+
